@@ -16,7 +16,7 @@ public class RatingView extends View {
 
     int borderCount = 6; //边数量
 
-    float radius = 50f;
+    float radius = dp(100);
 
     Paint borderPaint = new Paint();
     Paint ratingPaint = new Paint();
@@ -27,7 +27,7 @@ public class RatingView extends View {
 
     float parAngle = 0;
 
-    float[] ratings = new float[]{0.3f, 0.9f, 0.8f, 0.5f, 0.6f, 0.7f};
+    float[] ratings = new float[]{0.7f, 0.9f, 0.8f, 0.5f, 0.6f, 0.7f};
 
     public RatingView(Context context) {
         super(context);
@@ -47,13 +47,36 @@ public class RatingView extends View {
     void init() {
 
         borderPaint.setColor(0xFFFF0000);
-        borderPaint.setStrokeWidth(5);
+        borderPaint.setStrokeWidth(dp(1));
         borderPaint.setStyle(Paint.Style.STROKE);
-        ratingPaint.setColor(0xFFFF00FF);
+        ratingPaint.setColor(0x66FF00FF);
 
-        radius = radius * getResources().getDisplayMetrics().density;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
+
+        canvas.save();
+        canvas.translate(width / 2, height / 2);
 
         parAngle = 360 / borderCount;
+
+        //绘制评分内容
+        for (int i = 0; i < borderCount; i++) {
+
+            float x = getXFromPolar(radius * ratings[i], i * parAngle);
+            float y = getYFromPolar(radius * ratings[i], i * parAngle);
+
+            if (i == 0) ratingPath.moveTo(x, y);
+            ratingPath.lineTo(x, y);
+        }
+        canvas.drawPath(ratingPath, ratingPaint);
+
+
         for (int i = 0; i < borderCount; i++) {
 
             float x = getXFromPolar(radius, i * parAngle);
@@ -68,26 +91,6 @@ public class RatingView extends View {
             axlePath.lineTo(x, y);
         }
         borderLinePath.close();
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-
-        canvas.translate(radius, radius);
-
-
-        //绘制评分内容
-        for (int i = 0; i < borderCount; i++) {
-
-            float x = getXFromPolar(radius * ratings[i], i * parAngle);
-            float y = getYFromPolar(radius * ratings[i], i * parAngle);
-
-            if (i == 0) ratingPath.moveTo(x, y);
-            ratingPath.lineTo(x, y);
-        }
-        canvas.drawPath(ratingPath, ratingPaint);
 
         //绘制外边框
         canvas.drawPath(borderLinePath, borderPaint);
@@ -95,6 +98,8 @@ public class RatingView extends View {
         canvas.drawPath(axlePath, borderPaint);
 
         //canvas.drawCircle(0, 0, 20, borderPaint);
+
+        canvas.restore();
     }
 
     /**
@@ -109,5 +114,9 @@ public class RatingView extends View {
      */
     float getYFromPolar(float p, float angle) {
         return (float) (p * Math.sin(Math.PI * angle / 180));
+    }
+
+    float dp(int dp) {
+        return dp * getResources().getDisplayMetrics().density;
     }
 }
